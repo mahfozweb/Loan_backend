@@ -13,30 +13,25 @@ app.use(express.json());
 // MongoDB connection URI
 const uri = process.env.MONGODB_URI;
 
-// Create a MongoClient with a MongoClientOptions object to set the Stable API version
-const client = new MongoClient(uri, {
-  serverApi: {
-    version: ServerApiVersion.v1,
-    strict: true,
-    deprecationErrors: true,
-  }
-});
+let client;
+if (uri) {
+  client = new MongoClient(uri, {
+    serverApi: {
+      version: ServerApiVersion.v1,
+      strict: true,
+      deprecationErrors: true,
+    }
+  });
+}
 
 async function run() {
   try {
+    if (!client) {
+      console.warn("MongoDB Client not initialized! Check your MONGODB_URI environment variable.");
+      return;
+    }
     // Connect the client to the server
     await client.connect();
-
-    const db = client.db("loanDB"); // You can change this to your desired database name
-
-    // Example routes
-    app.get("/", (req, res) => {
-      res.send("Loan Backend Server is running!");
-    });
-
-    app.get("/api", (req, res) => {
-      res.json({ message: "Loan Backend API is working!" });
-    });
 
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
@@ -47,6 +42,19 @@ async function run() {
   }
 }
 run().catch(console.dir);
+
+// Root Route
+app.get("/", (req, res) => {
+  res.send("Loan Backend Server is running!");
+});
+
+// Sample API Route
+app.get("/api", (req, res) => {
+  res.json({
+    message: "Loan Backend API is working!",
+    database: uri ? "Connected/Attempting" : "URI Missing in Env"
+  });
+});
 
 // Export for Vercel
 module.exports = app;
