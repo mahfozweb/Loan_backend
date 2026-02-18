@@ -1,18 +1,15 @@
 const express = require("express");
 const cors = require("cors");
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
+
 const app = express();
 const port = process.env.PORT || 4000;
-// middleware///
 
+// middleware
 app.use(cors());
 app.use(express.json());
 
-// yPq8Gu5txRh7VeTc
-// LoanDBUser
-
-
-const { MongoClient, ServerApiVersion } = require('mongodb');
+// MongoDB connection URI
 const uri = "mongodb+srv://LoanDBUser:yPq8Gu5txRh7VeTc@cluster0.sgnnmzs.mongodb.net/?appName=Cluster0";
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
