@@ -23,14 +23,30 @@ const client = new MongoClient(uri, {
 
 async function run() {
   try {
-    // Connect the client to the server	(optional starting in v4.7)
+    // Connect the client to the server
     await client.connect();
+
+    const db = client.db("loanDB"); // You can change this to your desired database name
+
+    // Example routes
+    app.get("/", (req, res) => {
+      res.send("Loan Backend Server is running!");
+    });
+
+    app.get("/api", (req, res) => {
+      res.json({ message: "Loan Backend API is working!" });
+    });
+
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
-  } finally {
-    // Ensures that the client will close when you finish/error
-    await client.close();
+
+  } catch (error) {
+    console.error("Error connecting to MongoDB:", error);
   }
 }
 run().catch(console.dir);
+
+app.listen(port, () => {
+  console.log(`Server is running on port ${port}`);
+});
