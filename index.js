@@ -246,7 +246,7 @@ app.get('/applications', verifyToken, async (req, res) => {
   const status = req.query.status;
 
   let query = {};
-  if (role === 'borrower') query.borrowerEmail = email;
+  if (role === 'borrower') query.email = email;
   if (status) query.status = status;
 
   const result = await applicationsCollection.find(query).toArray();
