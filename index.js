@@ -125,14 +125,22 @@ app.get('/', (req, res) => {
 
 // Auth API
 app.post('/jwt', async (req, res) => {
-  const user = req.body;
-  if (!process.env.ACCESS_TOKEN_SECRET) return res.status(500).send({ message: 'Token Secret missing' });
-  const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '1h' });
-  res.cookie('token', token, {
-    httpOnly: true,
-    secure: true,
-    sameSite: 'none',
-  }).send({ success: true, token });
+  try {
+    const user = req.body;
+    if (!process.env.ACCESS_TOKEN_SECRET) {
+      console.error("ACCESS_TOKEN_SECRET is not defined!");
+      return res.status(500).send({ message: 'Server Configuration Error: Token Secret missing' });
+    }
+    const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '1h' });
+    res.cookie('token', token, {
+      httpOnly: true,
+      secure: true,
+      sameSite: 'none',
+    }).send({ success: true, token });
+  } catch (error) {
+    console.error("JWT Error:", error);
+    res.status(500).send({ message: 'Internal Server Error' });
+  }
 });
 
 app.post('/logout', async (req, res) => {
