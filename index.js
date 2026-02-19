@@ -170,12 +170,12 @@ app.post('/users', async (req, res) => {
   const updateDoc = {
     $set: {
       name: user.name,
-      email: user.email,
       photoURL: user.photoURL,
-      role: user.role || 'borrower',
-      status: user.status || 'active'
     },
     $setOnInsert: {
+      email: user.email,
+      role: user.role || 'borrower',
+      status: 'active',
       createdAt: new Date()
     }
   };
