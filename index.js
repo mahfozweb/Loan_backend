@@ -94,7 +94,9 @@ const verifyToken = (req, res, next) => {
 const verifyAdmin = async (req, res, next) => {
   const email = req.user.email;
   if (!usersCollection) return res.status(500).send({ message: 'Database not initialized' });
-  const user = await usersCollection.findOne({ email });
+  const user = await usersCollection.findOne({
+    email: { $regex: new RegExp(`^${email}$`, 'i') }
+  });
   const isAdmin = user?.role === 'admin';
   if (!isAdmin) {
     return res.status(403).send({ message: 'forbidden access' });
@@ -105,7 +107,9 @@ const verifyAdmin = async (req, res, next) => {
 const verifyManager = async (req, res, next) => {
   const email = req.user.email;
   if (!usersCollection) return res.status(500).send({ message: 'Database not initialized' });
-  const user = await usersCollection.findOne({ email });
+  const user = await usersCollection.findOne({
+    email: { $regex: new RegExp(`^${email}$`, 'i') }
+  });
   const isManager = user?.role === 'manager' || user?.role === 'admin';
   if (!isManager) {
     return res.status(403).send({ message: 'forbidden access' });
@@ -158,7 +162,7 @@ app.get('/users', verifyToken, verifyAdmin, async (req, res) => {
 
 app.get('/user/role/:email', async (req, res) => {
   if (!usersCollection) return res.status(500).send({ message: 'Database disconnected' });
-  const email = req.params.email;
+  const email = req.params.email?.trim().toLowerCase();
   console.log("Searching for user role with email:", email);
   // Use case-insensitive search for email safety
   const user = await usersCollection.findOne({
