@@ -66,7 +66,13 @@ if (uri) {
 
 // Verify JWT Middleware
 const verifyToken = (req, res, next) => {
-  const token = req?.cookies?.token;
+  let token = req?.cookies?.token;
+
+  // Fallback to Authorization header (Bearer token)
+  if (!token && req.headers.authorization) {
+    token = req.headers.authorization.split(' ')[1];
+  }
+
   if (!token) {
     return res.status(401).send({ message: 'unauthorized access' });
   }
@@ -119,9 +125,9 @@ app.post('/jwt', async (req, res) => {
   const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '1h' });
   res.cookie('token', token, {
     httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict',
-  }).send({ success: true });
+    secure: true,
+    sameSite: 'none',
+  }).send({ success: true, token });
 });
 
 app.post('/logout', async (req, res) => {
