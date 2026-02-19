@@ -159,7 +159,10 @@ app.get('/users', verifyToken, verifyAdmin, async (req, res) => {
 app.get('/user/role/:email', async (req, res) => {
   if (!usersCollection) return res.status(500).send({ message: 'Database disconnected' });
   const email = req.params.email;
-  const user = await usersCollection.findOne({ email });
+  // Use case-insensitive search for email safety
+  const user = await usersCollection.findOne({
+    email: { $regex: new RegExp(`^${email}$`, 'i') }
+  });
   res.send({ role: user?.role, status: user?.status });
 });
 
