@@ -74,7 +74,7 @@ const verifyToken = (req, res, next) => {
   }
 
   if (!token) {
-    return res.status(401).send({ message: 'unauthorized access' });
+    return res.status(401).send({ message: 'unauthorized access: no token provided' });
   }
   if (!process.env.ACCESS_TOKEN_SECRET) {
     console.error("ACCESS_TOKEN_SECRET missing");
@@ -82,7 +82,8 @@ const verifyToken = (req, res, next) => {
   }
   jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decoded) => {
     if (err) {
-      return res.status(401).send({ message: 'unauthorized access' });
+      console.error("JWT Verify Error:", err.message);
+      return res.status(401).send({ message: 'unauthorized access: invalid or expired token' });
     }
     req.user = decoded;
     next();
