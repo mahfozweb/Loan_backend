@@ -166,16 +166,21 @@ app.get('/user/role/:email', async (req, res) => {
 app.post('/users', async (req, res) => {
   if (!usersCollection) return res.status(500).send({ message: 'Database disconnected' });
   const user = req.body;
-  const existingUser = await usersCollection.findOne({ email: user.email });
-  if (existingUser) {
-    return res.send({ message: 'user already exists', insertedId: null });
-  }
-  const result = await usersCollection.insertOne({
-    ...user,
-    role: user.role || 'borrower',
-    status: 'active',
-    createdAt: new Date()
-  });
+  const filter = { email: user.email };
+  const updateDoc = {
+    $set: {
+      name: user.name,
+      email: user.email,
+      photoURL: user.photoURL,
+      role: user.role || 'borrower',
+      status: user.status || 'active'
+    },
+    $setOnInsert: {
+      createdAt: new Date()
+    }
+  };
+  const options = { upsert: true };
+  const result = await usersCollection.updateOne(filter, updateDoc, options);
   res.send(result);
 });
 
