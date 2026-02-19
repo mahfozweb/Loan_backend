@@ -177,13 +177,11 @@ app.patch('/users/role/:id', verifyToken, verifyAdmin, async (req, res) => {
   const id = req.params.id;
   const { role, status, reason } = req.body;
   const filter = { _id: new ObjectId(id) };
-  const updateDoc = {
-    $set: {
-      role,
-      status,
-      suspendReason: reason || null
-    },
-  };
+  const updateDoc = { $set: {} };
+  if (role) updateDoc.$set.role = role;
+  if (status) updateDoc.$set.status = status;
+  if (reason !== undefined) updateDoc.$set.suspendReason = reason || null;
+
   const result = await usersCollection.updateOne(filter, updateDoc);
   res.send(result);
 });
