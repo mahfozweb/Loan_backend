@@ -19,7 +19,9 @@ app.use(cors({
     'https://microloanlink.firebaseapp.com',
     'https://microloanlink.web.app'
   ],
-  credentials: true
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept']
 }));
 app.use(express.json());
 app.use(cookieParser());
@@ -66,20 +68,26 @@ if (uri) {
 
 // Verify JWT Middleware
 const verifyToken = (req, res, next) => {
+  // 1. Try to get token from cookie
   let token = req?.cookies?.token;
 
-  // Fallback to Authorization header (Bearer token)
+  // 2. Try to get token from Authorization header (Bearer token)
   if (!token && req.headers.authorization) {
-    token = req.headers.authorization.split(' ')[1];
+    const authHeader = req.headers.authorization;
+    if (authHeader.startsWith('Bearer ')) {
+      token = authHeader.split(' ')[1];
+    }
   }
 
-  if (!token) {
+  if (!token || token === 'undefined' || token === 'null') {
     return res.status(401).send({ message: 'unauthorized access: no token provided' });
   }
+
   if (!process.env.ACCESS_TOKEN_SECRET) {
     console.error("ACCESS_TOKEN_SECRET missing");
     return res.status(500).send({ message: 'Server Configuration Error' });
   }
+
   jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decoded) => {
     if (err) {
       console.error("JWT Verify Error:", err.message);
@@ -89,6 +97,7 @@ const verifyToken = (req, res, next) => {
     next();
   });
 };
+
 
 // Role Verification Middlewares
 const verifyAdmin = async (req, res, next) => {
