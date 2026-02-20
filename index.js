@@ -79,6 +79,7 @@ const verifyToken = (req, res, next) => {
     }
   }
 
+
   if (!token || token === 'undefined' || token === 'null') {
     return res.status(401).send({ message: 'unauthorized access: no token provided' });
   }
